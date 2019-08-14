@@ -1,0 +1,124 @@
+import json
+
+def find_str(string, str1):
+    last_position = -1
+    while True:
+        position = string.find(str1, last_position + 1)
+        if position == -1:
+            return last_position
+        last_position = position
+        
+# def get_speak_data(raw_text):
+#     # 输入一段落或者说一篇文章
+#     str2 = ''
+#     # 为什么会一直循环，因为最后一个句子超200 没有句号咋整
+#     start = 0
+#     while True:
+#         if len(raw_text[start:]) < 200:
+#             str2 = str2+raw_text[start:]
+#     #         print(raw_text[start:])
+#             break
+#         elif find_str(raw_text[start:], '。') == -1:
+#     #         print(raw_text[start:start + 100])
+#             str2 = str2+raw_text[start:start + 200]+'\n'
+#             break
+#         temp = raw_text[start:start + 200]
+#         index = find_str(temp, '。')
+#         index1 = 0
+#         while index == -1:
+#             index = raw_text[start + 200:].find('。')
+#             index1 += index+200
+#             if index !=-1:
+#                 index = index1
+#         if not (len(raw_text[start:]) < 200):
+#     #         print(raw_text[start:start + 100])
+#             str2 = str2+raw_text[start:start + 200]+'\n'
+#         start += index + 1
+#     return str2
+def get_speak_data(raw_text):
+    # 输入一段落或者说一篇文章
+    str2 = ''
+    # 为什么会一直循环，因为最后一个句子超200 没有句号咋整
+    if find_str(raw_text, '，') == -1 or find_str(raw_text, '。') == -1 :
+        return str2
+    start = 0
+    while True:
+        if len(raw_text[start:]) < 200:
+            str2 = str2+raw_text[start:]
+            break
+        temp = raw_text[start:start + 200]
+        if find_str(temp, '，') == -1:
+            break
+        
+        index = max(find_str(temp, '，'),find_str(temp, '。')) 
+        
+        str2 = str2+raw_text[start:start + index+1 ]+'\n'      
+        start = start + index + 1  
+        
+    return str2
+
+with open('/Users/juniorfellow/Desktop/people_raw_data.json','r',encoding='utf8') as f3:
+    text = f3.readlines()
+
+
+people_data_list = []
+for txt in text:
+    r = json.loads(txt)['content']
+    #text = text.replace('：','，')
+    r = r.replace(" ","")
+    r = r.replace("\t","")
+    r = r.replace("\f","")
+    r = r.replace("\r","")
+    r = r.replace("\n","")
+    r = r.replace("，，","，")
+    r = r.replace("，。","。")
+    r = r.replace("。。","。")
+    r = r.replace("。，","。")                
+    people_data_list.append(r) 
+    
+       
+# 知道了 \n后加空格了  
+with open('/Users/juniorfellow/Desktop/people_raw_data.txt','w',encoding = 'utf8') as f4:    
+    for people_data in people_data_list:
+        print(people_data[:3])
+#         print(people_data)
+#         f2.write(get_speak_data(raw_text))
+        aa = get_speak_data(people_data)
+        for line in aa.split('\n'):
+            if line:
+                for word in line:
+                    f4.write(word+' ')
+                f4.write('\n')   
+                
+                
+                
+#######制作data
+with open('/Users/juniorfellow/Desktop/people_raw_data.txt','r',encoding = 'utf8') as f5:  
+    data = f5.read()
+with open('/Users/juniorfellow/Desktop/people_data.txt','w',encoding = 'utf8') as f6:  
+    for char in data:
+        if char == '，':
+            f6.write('<SEP>')
+        elif char == '。':
+            f6.write('<SEP>')
+        else:
+            f6.write(char)
+            
+#######制作label
+with open('/Users/juniorfellow/Desktop/people_raw_data.txt','r',encoding = 'utf8') as f5:  
+    data = f5.read()
+with open('/Users/juniorfellow/Desktop/people_label.txt','w',encoding = 'utf8') as f6:  
+    for char in data:
+        if char == '，':
+            f6.write('NC')
+        elif char == '。':
+            f6.write('NP')
+        elif char == ' ':
+            f6.write(' ')
+        elif char == '\n':
+            f6.write('\n')
+        else:
+            f6.write('O')
+            
+            
+    
